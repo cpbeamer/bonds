@@ -1,0 +1,301 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String            @id @default(cuid())
+  clerkId           String            @unique
+  email             String            @unique
+  firstName         String?
+  lastName          String?
+  taxProfile        Json?
+  timezone          String            @default("America/New_York")
+  cadence           DeliveryCadence   @default(DAILY)
+  deliveryTime      String            @default("08:00")
+  onboardingCompleted Boolean         @default(false)
+
+  subscription      Subscription?
+  prompts           Prompt[]
+  runs              Run[]
+  watchlist         Watchlist[]
+  alerts            Alert[]
+  settings          UserSettings?
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model UserSettings {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id])
+
+  riskMode          RiskMode          @default(MODERATE)
+  ratingFloor       String            @default("A")
+  priceFloor        Float             @default(95.0)
+  ytwFloor          Float             @default(4.0)
+  maxMaturity       Int               @default(30)
+  maxDuration       Float?
+  allowCallable     Boolean           @default(true)
+  sectorExcludes    String[]          @default([])
+  minLotSize        Float             @default(5000)
+  emailFormat       EmailFormat       @default(HTML)
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Subscription {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id])
+
+  stripeCustomerId  String            @unique
+  stripeSubscriptionId String?        @unique
+  stripePriceId     String?
+  status            SubscriptionStatus @default(TRIALING)
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean           @default(false)
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Prompt {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+
+  name              String
+  text              String
+  filters           Json
+  active            Boolean           @default(true)
+
+  runs              Run[]
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Bond {
+  id                String            @id @default(cuid())
+  cusip             String            @unique
+  isin              String?
+
+  type              BondType
+  issuerName        String
+  issuerId          String?
+  issuer            Issuer?           @relation(fields: [issuerId], references: [id])
+
+  state             String?
+  sector            String?
+  subsector         String?
+  coupon            Float
+  maturity          DateTime
+  callable          Boolean           @default(false)
+  callSchedule      Json?
+  minDenomination   Float             @default(5000)
+
+  moodysRating      String?
+  spRating          String?
+  fitchRating       String?
+  ratingBucket      String?
+
+  federalTaxExempt  Boolean           @default(false)
+  stateTaxExempt    Boolean           @default(false)
+  amt               Boolean           @default(false)
+  taxableEquivalent Boolean           @default(false)
+  bankQualified     Boolean           @default(false)
+
+  insured           Boolean           @default(false)
+  insurer           String?
+  underlyingRating  String?
+
+  marketData        MarketData[]
+  results           Result[]
+  watchlist         Watchlist[]
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([type, state])
+  @@index([maturity])
+  @@index([ratingBucket])
+}
+
+model Issuer {
+  id                String            @id @default(cuid())
+  name              String            @unique
+  type              IssuerType
+  state             String?
+  sector            String?
+  creditQuality     String?
+
+  bonds             Bond[]
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model MarketData {
+  id                String            @id @default(cuid())
+  bondId            String
+  bond              Bond              @relation(fields: [bondId], references: [id])
+
+  asOf              DateTime
+  price             Float
+  yield             Float
+  yieldToWorst      Float
+  duration          Float?
+  modifiedDuration  Float?
+  convexity         Float?
+  spread            Float?
+
+  bidPrice          Float?
+  askPrice          Float?
+  lastTradeDate     DateTime?
+  lastTradePrice    Float?
+  lastTradeYield    Float?
+  volume30d         Float?
+  tradeCount30d     Int?
+
+  createdAt         DateTime          @default(now())
+
+  @@unique([bondId, asOf])
+  @@index([asOf])
+}
+
+model Run {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+  promptId          String?
+  prompt            Prompt?           @relation(fields: [promptId], references: [id])
+
+  ranAt             DateTime          @default(now())
+  inputSnapshot     Json
+  status            RunStatus         @default(RUNNING)
+  error             String?
+
+  results           Result[]
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Result {
+  id                String            @id @default(cuid())
+  runId             String
+  run               Run               @relation(fields: [runId], references: [id])
+  bondId            String
+  bond              Bond              @relation(fields: [bondId], references: [id])
+
+  rank              Int
+  atytw             Float
+  preTaxYtw         Float
+  effectiveTaxRate  Float
+  stabilityScore    Float
+  liquidityScore    Float
+  oidAdjustment     Float?
+
+  explanation       Json
+
+  createdAt         DateTime          @default(now())
+
+  @@unique([runId, bondId])
+  @@index([runId, rank])
+}
+
+model Watchlist {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+  bondId            String
+  bond              Bond              @relation(fields: [bondId], references: [id])
+
+  targetPrice       Float?
+  targetYield       Float?
+  notes             String?
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@unique([userId, bondId])
+}
+
+model Alert {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+
+  type              AlertType
+  bondCusip         String?
+  condition         Json
+  triggered         Boolean           @default(false)
+  triggeredAt       DateTime?
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+enum BondType {
+  TREASURY
+  MUNICIPAL
+  CORPORATE
+  AGENCY
+  TAXABLE_MUNI
+}
+
+enum IssuerType {
+  MUNICIPALITY
+  COUNTY
+  STATE
+  CORPORATION
+  AGENCY
+  AUTHORITY
+}
+
+enum DeliveryCadence {
+  DAILY
+  TWICE_WEEKLY
+  WEEKLY
+  MONTHLY
+}
+
+enum RiskMode {
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+enum EmailFormat {
+  HTML
+  TEXT
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+}
+
+enum RunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum AlertType {
+  PRICE_TARGET
+  YIELD_TARGET
+  CALL_APPROACHING
+  MATURITY_APPROACHING
+  RATING_CHANGE
+}
