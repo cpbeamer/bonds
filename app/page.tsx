@@ -4,27 +4,13 @@ import { ArrowRight, TrendingUp, Shield, Clock, Calculator } from 'lucide-react'
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex justify-between items-center">
-          <div className="text-2xl font-bold text-slate-900">BondScout</div>
-          <div className="flex gap-4">
-            <Link href="/sign-in">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </nav>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <main className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-slate-900 mb-6">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Tax-Aware Bond Intelligence
           </h1>
-          <p className="text-xl text-slate-600 mb-8">
+          <p className="text-xl text-gray-600 mb-8">
             Turn overwhelming bond searches into ranked, actionable opportunities.
             Personalized after-tax yields delivered to your inbox daily.
           </p>
@@ -42,31 +28,39 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20" id="features">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Calculator className="w-10 h-10 text-slate-900 mb-4" />
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <Calculator className="w-10 h-10 text-orange-600" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">After-Tax Yields</h3>
-              <p className="text-slate-600 text-sm">
+              <p className="text-gray-600 text-sm">
                 Automatic ATYTW calculations including OID/premium adjustments
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Shield className="w-10 h-10 text-slate-900 mb-4" />
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <Shield className="w-10 h-10 text-orange-600" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">Stability Scoring</h3>
-              <p className="text-slate-600 text-sm">
+              <p className="text-gray-600 text-sm">
                 Issuer and sector analysis for solvency context
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <TrendingUp className="w-10 h-10 text-slate-900 mb-4" />
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <TrendingUp className="w-10 h-10 text-orange-600" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">Smart Rankings</h3>
-              <p className="text-slate-600 text-sm">
+              <p className="text-gray-600 text-sm">
                 Top 5-10 opportunities from thousands of bonds
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <Clock className="w-10 h-10 text-slate-900 mb-4" />
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <div className="flex justify-center mb-4">
+                <Clock className="w-10 h-10 text-orange-600" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">Daily Delivery</h3>
-              <p className="text-slate-600 text-sm">
+              <p className="text-gray-600 text-sm">
                 Fresh opportunities at 8 AM ET or your schedule
               </p>
             </div>
@@ -76,23 +70,23 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold mb-6">How It Works</h2>
             <div className="grid md:grid-cols-3 gap-8 text-left">
               <div>
-                <div className="text-4xl font-bold text-slate-300 mb-2">01</div>
+                <div className="text-4xl font-bold text-orange-200 mb-2">01</div>
                 <h3 className="text-xl font-semibold mb-2">Set Your Profile</h3>
-                <p className="text-slate-600">
+                <p className="text-gray-600">
                   Enter your tax situation, risk preferences, and search criteria
                 </p>
               </div>
               <div>
-                <div className="text-4xl font-bold text-slate-300 mb-2">02</div>
+                <div className="text-4xl font-bold text-orange-200 mb-2">02</div>
                 <h3 className="text-xl font-semibold mb-2">We Scout Daily</h3>
-                <p className="text-slate-600">
+                <p className="text-gray-600">
                   Our engine analyzes thousands of bonds for after-tax value
                 </p>
               </div>
               <div>
-                <div className="text-4xl font-bold text-slate-300 mb-2">03</div>
+                <div className="text-4xl font-bold text-orange-200 mb-2">03</div>
                 <h3 className="text-xl font-semibold mb-2">Get Top Picks</h3>
-                <p className="text-slate-600">
+                <p className="text-gray-600">
                   Receive ranked opportunities with clear explanations
                 </p>
               </div>
@@ -102,7 +96,7 @@ export default function LandingPage() {
           <div className="mt-20">
             <h2 className="text-3xl font-bold mb-6">Simple Pricing</h2>
             <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
-              <div className="text-4xl font-bold mb-2">$50<span className="text-lg text-slate-600">/month</span></div>
+              <div className="text-4xl font-bold mb-2">$50<span className="text-lg text-gray-600">/month</span></div>
               <ul className="text-left space-y-2 mb-6">
                 <li className="flex items-start gap-2">
                   <span className="text-green-500">✓</span>
@@ -135,7 +129,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <footer className="bg-slate-900 text-white py-8 mt-20">
+      <footer className="bg-gray-900 text-white py-8 mt-20">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm">© 2024 BondScout. Investment research tool, not advice.</p>
         </div>
