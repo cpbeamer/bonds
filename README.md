@@ -98,12 +98,96 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
 
+## FINRA Data Integration
+
+BondScout uses FINRA TRACE data to provide real-time bond pricing and market information. **For development, the app includes comprehensive mock data so you can test without needing API access.**
+
+### Mock Data Mode (Development)
+
+The application automatically uses mock data in development mode. The mock data includes:
+
+- **22 realistic bonds** across different sectors:
+  - Corporate bonds (Apple, Microsoft, Amazon, etc.)
+  - Municipal bonds (CA, NY, TX, FL, IL, MA)
+  - Treasury bonds (5, 10, 30-year)
+  - Agency bonds (Fannie Mae, FHLB)
+  - High-yield bonds
+
+- **Features**:
+  - Realistic pricing, yields, and trade volumes
+  - Tax-exempt status for municipal bonds
+  - Callable bond schedules
+  - Multiple rating agencies (Moody's, S&P, Fitch)
+  - Historical trade data generation
+
+#### Testing Mock Data
+
+```bash
+# Test the mock data implementation
+npm run finra:test
+```
+
+#### Configuring Mock Mode
+
+In your `.env` file:
+```env
+# Automatically true in development
+USE_MOCK_FINRA_DATA=true
+NODE_ENV=development
+```
+
+### Setting up FINRA Data
+
+1. **Initial Database Seed:**
+```bash
+# Seed database with popular bonds and initial data
+npm run finra:seed
+```
+
+2. **Manual Data Sync:**
+```bash
+# Run an immediate sync of bond data
+npm run finra:sync
+```
+
+3. **Automated Scheduler:**
+```bash
+# Start the automated scheduler for daily updates
+npm run finra:scheduler
+
+# With immediate sync on startup
+npm run finra:scheduler -- --immediate
+
+# With database seeding
+npm run finra:scheduler -- --seed
+```
+
+### FINRA Data Schedule
+
+- **Daily Sync**: Runs at 6:00 AM to update all bonds
+- **Intraday Sync**: Runs every 4 hours on weekdays for market data updates
+
+### API Endpoints
+
+- `GET /api/bonds/results` - Get bond recommendations based on user profile
+- `POST /api/bonds/sync` - Trigger manual data sync (authenticated)
+
+### Data Sources
+
+The integration fetches:
+- Corporate bond trades from FINRA TRACE
+- Municipal bond data for tax-exempt analysis
+- Treasury bonds for baseline comparisons
+- Real-time pricing, yields, and trade volumes
+
 ## Project Structure
 
 ```
 bondscout-app/
 ├── app/                    # Next.js app directory
 │   ├── api/               # API routes
+│   │   ├── bonds/         # Bond data endpoints
+│   │   └── user/          # User management
 │   ├── dashboard/         # Dashboard page
 │   ├── onboarding/        # Onboarding flow
 │   ├── sign-in/           # Authentication pages
@@ -112,9 +196,14 @@ bondscout-app/
 │   └── ui/               # shadcn/ui components
 ├── lib/                   # Utility functions
 │   ├── calculations/      # ATYTW and scoring logic
+│   ├── services/          # External service integrations
+│   │   └── finra/         # FINRA data service
 │   └── prisma.ts         # Prisma client
 ├── prisma/               # Database schema
 │   └── schema.prisma
+├── scripts/              # Utility scripts
+│   ├── seed-finra.ts     # FINRA data seeder
+│   └── start-scheduler.ts # Scheduler starter
 └── public/               # Static assets
 ```
 
