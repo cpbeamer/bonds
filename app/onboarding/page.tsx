@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowRight, Calculator, Shield, DollarSign } from 'lucide-react'
 import { toast } from 'sonner'
+import { theme, brand } from '@/lib/themes'
 
 const US_STATES = [
   { value: 'VA', label: 'Virginia' },
@@ -100,11 +101,11 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className={`${theme.layout.page.background} p-4`}>
       <div className="max-w-4xl mx-auto py-8">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Welcome to BondScout</h1>
-          <p className="text-slate-600">Let's set up your personalized bond scouting profile</p>
+          <h1 className="text-3xl font-bold mb-2 dark:text-neutral-100">Welcome to {brand.name}</h1>
+          <p className="text-slate-600 dark:text-neutral-300">Let's set up your personalized bond scouting profile</p>
         </div>
 
         <Tabs value={currentStep} className="space-y-6">
@@ -206,9 +207,9 @@ export default function OnboardingPage() {
                       id="amt"
                       checked={taxProfile.amtApplies}
                       onChange={(e) => setTaxProfile({...taxProfile, amtApplies: e.target.checked})}
-                      className="w-4 h-4"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-neutral-600 text-orange-600 focus:ring-orange-500 dark:bg-neutral-800"
                     />
-                    <Label htmlFor="amt">Subject to AMT</Label>
+                    <Label htmlFor="amt" className="dark:text-neutral-200">Subject to AMT</Label>
                   </div>
                 </div>
 
@@ -293,9 +294,9 @@ export default function OnboardingPage() {
                     id="callable"
                     checked={preferences.allowCallable}
                     onChange={(e) => setPreferences({...preferences, allowCallable: e.target.checked})}
-                    className="w-4 h-4"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-neutral-600 text-orange-600 focus:ring-orange-500 dark:bg-neutral-800"
                   />
-                  <Label htmlFor="callable">Include callable bonds</Label>
+                  <Label htmlFor="callable" className="dark:text-neutral-200">Include callable bonds</Label>
                 </div>
 
                 <Button onClick={handlePreferencesSubmit} className="w-full">
@@ -339,11 +340,11 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                <Card className="bg-slate-50 border-slate-200">
+                <Card className="bg-slate-50 dark:bg-neutral-800 border-slate-200 dark:border-neutral-700">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <p className="text-2xl font-bold mb-2">$50/month</p>
-                      <p className="text-sm text-slate-600">7-day free trial • Cancel anytime</p>
+                      <p className="text-2xl font-bold mb-2 dark:text-neutral-100">$50/month</p>
+                      <p className="text-sm text-slate-600 dark:text-neutral-400">7-day free trial • Cancel anytime</p>
                     </div>
                   </CardContent>
                 </Card>

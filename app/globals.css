@@ -42,17 +42,17 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Claude-inspired neutral colors */
+  /* Claude's exact neutral colors */
   --color-neutral-50: #F4F3EE;
   --color-neutral-100: #E9E6E0;
   --color-neutral-200: #D5D0C7;
   --color-neutral-300: #B1ADA1;
-  --color-neutral-400: #8B857A;
-  --color-neutral-500: #6B6460;
-  --color-neutral-600: #534E4A;
-  --color-neutral-700: #3E3A37;
-  --color-neutral-800: #2A2723;
-  --color-neutral-900: #1A1815;
+  --color-neutral-400: #9B968C;
+  --color-neutral-500: #7A756B;
+  --color-neutral-600: #625D54;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #30302E;
+  --color-neutral-900: #262624;
 }
 
 :root {
@@ -91,37 +91,37 @@
 }
 
 .dark {
-  /* Claude-inspired warm dark theme */
-  --background: oklch(0.15 0.02 45); /* #1A1815 - Deep warm dark */
-  --foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
-  --card: oklch(0.20 0.02 45); /* #2A2723 - Warm dark surface */
-  --card-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
-  --popover: oklch(0.20 0.02 45); /* #2A2723 - Warm dark surface */
-  --popover-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
+  /* Claude's exact dark mode colors */
+  --background: #262624; /* Claude's exact dark mode background */
+  --foreground: #E5E5E3; /* Claude's text color */
+  --card: #30302E; /* Claude's text box color for cards */
+  --card-foreground: #E5E5E3; /* Claude's text color */
+  --popover: #30302E; /* Claude's text box color */
+  --popover-foreground: #E5E5E3; /* Claude's text color */
   --primary: oklch(0.66 0.17 37); /* Keep orange primary */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.25 0.02 45); /* #3E3A37 - Warmer secondary */
-  --secondary-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
-  --muted: oklch(0.25 0.02 45); /* #3E3A37 - Warmer muted */
-  --muted-foreground: oklch(0.75 0.02 45); /* #B1ADA1 - Claude's cloudy */
+  --secondary: #3A3A37; /* Slightly lighter than text box */
+  --secondary-foreground: #E5E5E3; /* Claude's text color */
+  --muted: #3A3A37; /* Slightly lighter than text box */
+  --muted-foreground: #B0B0AE; /* Muted text based on Claude's style */
   --accent: oklch(0.55 0.15 32); /* #C15F3C - Claude's crail color */
-  --accent-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
+  --accent-foreground: #E5E5E3; /* Claude's text color */
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.35 0.02 45); /* #534E4A - Warm border */
-  --input: oklch(0.25 0.02 45); /* #3E3A37 - Warm input background */
+  --border: #404040; /* Subtle border based on Claude's interface */
+  --input: #3A3A37; /* Slightly lighter to differentiate from background */
   --ring: oklch(0.66 0.17 37); /* Orange ring */
   --chart-1: oklch(0.66 0.17 37); /* Orange */
   --chart-2: oklch(0.55 0.15 32); /* Claude accent */
-  --chart-3: oklch(0.75 0.02 45); /* Warm neutral */
+  --chart-3: #B0B0AE; /* Muted chart color */
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.20 0.02 45); /* #2A2723 - Warm dark surface */
-  --sidebar-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
+  --sidebar: #30302E; /* Claude's text box color */
+  --sidebar-foreground: #E5E5E3; /* Claude's text color */
   --sidebar-primary: oklch(0.55 0.15 32); /* #C15F3C - Claude accent */
-  --sidebar-primary-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
-  --sidebar-accent: oklch(0.25 0.02 45); /* #3E3A37 - Warmer accent */
-  --sidebar-accent-foreground: oklch(0.95 0.02 45); /* #F4F3EE - Warm white */
-  --sidebar-border: oklch(0.35 0.02 45); /* #534E4A - Warm border */
+  --sidebar-primary-foreground: #E5E5E3; /* Claude's text color */
+  --sidebar-accent: #3A3A37; /* Slightly lighter variant */
+  --sidebar-accent-foreground: #E5E5E3; /* Claude's text color */
+  --sidebar-border: #404040; /* Subtle border */
   --sidebar-ring: oklch(0.66 0.17 37); /* Orange ring */
 }
 

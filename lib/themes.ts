@@ -42,18 +42,18 @@ export const theme = {
       900: '#0f172a',  // slate-900
     },
 
-    // Claude-inspired warm neutral colors
+    // Claude's exact neutral colors
     neutral: {
       50: '#F4F3EE',   // Claude's Pampas
       100: '#E9E6E0',
       200: '#D5D0C7',
       300: '#B1ADA1', // Claude's Cloudy
-      400: '#8B857A',
-      500: '#6B6460',
-      600: '#534E4A',
-      700: '#3E3A37',
-      800: '#2A2723',
-      900: '#1A1815',
+      400: '#9B968C', // Mid-tone
+      500: '#7A756B', // Neutral
+      600: '#625D54', // Dark neutral
+      700: '#404040', // Border color
+      800: '#30302E', // Claude's text box color
+      900: '#262624', // Claude's exact background
     },
 
     semantic: {
@@ -70,16 +70,16 @@ export const theme = {
       darkSecondary: '#2A2723', // Warmer dark gray
     },
 
-    // Dark mode specific colors (Claude-inspired)
+    // Dark mode specific colors (Claude's exact colors)
     dark: {
-      background: '#1A1815',
-      surface: '#2A2723',
-      surfaceSecondary: '#3E3A37',
-      border: '#534E4A',
+      background: '#262624', // Claude's exact background
+      surface: '#30302E',     // Claude's text box color
+      surfaceSecondary: '#3A3A37', // Slightly lighter variant
+      border: '#404040',      // Claude's border color
       text: {
-        primary: '#F4F3EE',
-        secondary: '#B1ADA1',
-        muted: '#8B857A',
+        primary: '#E5E5E3',   // Claude's text color
+        secondary: '#B1ADA1', // Claude's cloudy
+        muted: '#B0B0AE',     // Claude's muted text
       }
     },
 
@@ -182,7 +182,7 @@ export const theme = {
   layout: {
     header: {
       height: '4rem', // 64px (h-16)
-      background: 'bg-white border-b border-slate-200 dark:bg-neutral-900 dark:border-neutral-700',
+      background: 'bg-white border-b border-slate-200 dark:bg-neutral-800 dark:border-neutral-600',
       padding: 'px-4 py-4',
     },
 
@@ -193,7 +193,7 @@ export const theme = {
     },
 
     page: {
-      background: 'bg-slate-50 min-h-screen dark:bg-neutral-900',
+      background: 'bg-slate-50 min-h-screen dark:bg-neutral-800',
       padding: 'py-8',
     }
   },
