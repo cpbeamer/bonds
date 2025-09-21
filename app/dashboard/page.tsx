@@ -20,6 +20,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { theme, brand } from '@/lib/themes'
 
 interface BondResult {
   id: string
@@ -138,12 +139,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+    <div className={theme.layout.page.background}>
+      <header className={theme.layout.header.background}>
+        <div className={`${theme.layout.container.margin} ${theme.layout.container.padding} py-4`}>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold">BondScout</h1>
+              <h1 className="text-2xl font-bold">{brand.name}</h1>
               <Badge variant="outline">Dashboard</Badge>
             </div>
             <div className="flex items-center gap-4">
@@ -161,7 +162,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className={`${theme.layout.container.margin} ${theme.layout.container.padding} ${theme.layout.page.padding}`}>
         <div className="grid gap-6 mb-8 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-3">
