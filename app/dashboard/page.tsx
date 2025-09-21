@@ -13,14 +13,12 @@ import {
   Search,
   Star,
   Calculator,
-  Settings,
-  Mail,
   ExternalLink,
   Filter,
   ChevronRight
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { theme, brand } from '@/lib/themes'
+import { theme } from '@/lib/themes'
 
 interface BondResult {
   id: string
@@ -139,29 +137,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className={theme.layout.page.background}>
-      <header className={theme.layout.header.background}>
-        <div className={`${theme.layout.container.margin} ${theme.layout.container.padding} py-4`}>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold">{brand.name}</h1>
-              <Badge variant="outline">Dashboard</Badge>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon">
-                <Mail className="w-5 h-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="w-5 h-5" />
-              </Button>
-              <div className="text-sm text-slate-600">
-                {user?.firstName} {user?.lastName}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="bg-background min-h-screen">
       <main className={`${theme.layout.container.margin} ${theme.layout.container.padding} ${theme.layout.page.padding}`}>
         <div className="grid gap-6 mb-8 md:grid-cols-4">
           <Card>
@@ -170,7 +146,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">3.12%</div>
-              <p className="text-xs text-slate-600">After-tax YTW</p>
+              <p className="text-xs text-muted-foreground">After-tax YTW</p>
             </CardContent>
           </Card>
           <Card>
@@ -179,7 +155,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">2,847</div>
-              <p className="text-xs text-slate-600">Last 24 hours</p>
+              <p className="text-xs text-muted-foreground">Last 24 hours</p>
             </CardContent>
           </Card>
           <Card>
@@ -188,7 +164,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-slate-600">3 with alerts</p>
+              <p className="text-xs text-muted-foreground">3 with alerts</p>
             </CardContent>
           </Card>
           <Card>
@@ -197,7 +173,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">8:00 AM</div>
-              <p className="text-xs text-slate-600">Tomorrow</p>
+              <p className="text-xs text-muted-foreground">Tomorrow</p>
             </CardContent>
           </Card>
         </div>
@@ -258,15 +234,15 @@ export default function DashboardPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {results.map((result) => (
-                        <TableRow key={result.id}>
+                      {results.map((result, index) => (
+                        <TableRow key={`${result.id}-${index}`}>
                           <TableCell>
                             <Badge variant="default">{result.rank}</Badge>
                           </TableCell>
                           <TableCell>
                             <div>
                               <div className="font-medium">{result.bond.issuerName}</div>
-                              <div className="text-sm text-slate-600">
+                              <div className="text-sm text-muted-foreground">
                                 {result.bond.state} • {result.bond.sector}
                               </div>
                             </div>
@@ -274,7 +250,7 @@ export default function DashboardPage() {
                           <TableCell>
                             <div className="text-sm">
                               <div>{result.bond.coupon}% • {new Date(result.bond.maturity).getFullYear()}</div>
-                              <div className="text-slate-600">
+                              <div className="text-muted-foreground">
                                 {result.bond.ratingBucket} {result.bond.callable && '• Callable'}
                               </div>
                             </div>
@@ -282,7 +258,7 @@ export default function DashboardPage() {
                           <TableCell className="text-right font-semibold">
                             {(result.atytw * 100).toFixed(2)}%
                           </TableCell>
-                          <TableCell className="text-right text-slate-600">
+                          <TableCell className="text-right text-muted-foreground">
                             {(result.preTaxYtw * 100).toFixed(2)}%
                           </TableCell>
                           <TableCell className="text-right">
@@ -330,19 +306,19 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-slate-600">10Y Treasury</p>
+                    <p className="text-sm text-muted-foreground">10Y Treasury</p>
                     <p className="text-lg font-semibold">4.25%</p>
-                    <p className="text-sm text-green-600">-2 bps</p>
+                    <p className="text-sm text-green-500 dark:text-green-400">-2 bps</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">Muni/Treasury Ratio</p>
+                    <p className="text-sm text-muted-foreground">Muni/Treasury Ratio</p>
                     <p className="text-lg font-semibold">68.5%</p>
-                    <p className="text-sm text-slate-600">+0.5%</p>
+                    <p className="text-sm text-muted-foreground">+0.5%</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">VA GO Index</p>
+                    <p className="text-sm text-muted-foreground">VA GO Index</p>
                     <p className="text-lg font-semibold">3.95%</p>
-                    <p className="text-sm text-green-600">-1 bp</p>
+                    <p className="text-sm text-green-500 dark:text-green-400">-1 bp</p>
                   </div>
                 </div>
               </CardContent>
@@ -358,7 +334,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-slate-600">
+                <div className="text-center py-12 text-muted-foreground">
                   Advanced search interface coming soon...
                 </div>
               </CardContent>
@@ -374,7 +350,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-slate-600">
+                <div className="text-center py-12 text-muted-foreground">
                   Your watchlist is empty. Add bonds from the results page.
                 </div>
               </CardContent>

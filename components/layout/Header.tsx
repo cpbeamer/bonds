@@ -7,13 +7,21 @@ import {
   SignedOut,
   UserButton,
 } from '@clerk/nextjs'
+import { usePathname } from 'next/navigation'
 import { theme, getButtonClasses, brand } from '@/lib/themes'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { Badge } from '@/components/ui/badge'
 
 export function Header() {
+  const pathname = usePathname()
+  const isDashboard = pathname === '/dashboard'
+
   return (
     <header className={`${theme.layout.header.background} ${theme.layout.header.padding} flex justify-between items-center gap-4`} style={{ height: theme.layout.header.height }}>
-      <div className="font-semibold text-xl dark:text-neutral-100">{brand.name}</div>
+      <div className="flex items-center gap-4">
+        <div className="font-semibold text-xl dark:text-neutral-100">{brand.name}</div>
+        {isDashboard && <Badge variant="outline">Dashboard</Badge>}
+      </div>
       <div className="flex items-center gap-4">
         <SignedOut>
           <ThemeToggle />

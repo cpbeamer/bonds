@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowRight, Calculator, Shield, DollarSign } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Calculator, Shield, DollarSign } from 'lucide-react'
 import { toast } from 'sonner'
 import { theme, brand } from '@/lib/themes'
 
@@ -108,17 +108,17 @@ export default function OnboardingPage() {
           <p className="text-slate-600 dark:text-neutral-300">Let's set up your personalized bond scouting profile</p>
         </div>
 
-        <Tabs value={currentStep} className="space-y-6">
+        <Tabs value={currentStep} onValueChange={setCurrentStep} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="tax" disabled={currentStep === 'preferences' || currentStep === 'subscription'}>
+            <TabsTrigger value="tax">
               <Calculator className="w-4 h-4 mr-2" />
               Tax Profile
             </TabsTrigger>
-            <TabsTrigger value="preferences" disabled={currentStep === 'tax' || currentStep === 'subscription'}>
+            <TabsTrigger value="preferences">
               <Shield className="w-4 h-4 mr-2" />
               Preferences
             </TabsTrigger>
-            <TabsTrigger value="subscription" disabled={currentStep === 'tax' || currentStep === 'preferences'}>
+            <TabsTrigger value="subscription">
               <DollarSign className="w-4 h-4 mr-2" />
               Delivery
             </TabsTrigger>
@@ -299,9 +299,14 @@ export default function OnboardingPage() {
                   <Label htmlFor="callable" className="dark:text-neutral-200">Include callable bonds</Label>
                 </div>
 
-                <Button onClick={handlePreferencesSubmit} className="w-full">
-                  Continue to Delivery Settings <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <div className="flex gap-4">
+                  <Button onClick={() => setCurrentStep('tax')} variant="outline" className="flex-1">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tax Profile
+                  </Button>
+                  <Button onClick={handlePreferencesSubmit} className="flex-1">
+                    Continue to Delivery <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -349,9 +354,14 @@ export default function OnboardingPage() {
                   </CardContent>
                 </Card>
 
-                <Button onClick={handleComplete} className="w-full" disabled={loading}>
-                  {loading ? 'Setting up...' : 'Complete Setup & Start Trial'}
-                </Button>
+                <div className="flex gap-4">
+                  <Button onClick={() => setCurrentStep('preferences')} variant="outline" className="flex-1">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to Preferences
+                  </Button>
+                  <Button onClick={handleComplete} className="flex-1" disabled={loading}>
+                    {loading ? 'Setting up...' : 'Complete Setup & Start Trial'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

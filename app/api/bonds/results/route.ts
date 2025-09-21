@@ -1,15 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { calculateATYTW } from '@/lib/calculations/atytw'
+import { computeATYTW } from '@/lib/calculations/atytw'
 import { calculateStabilityScore, calculateLiquidityScore } from '@/lib/calculations/scoring'
 
+// API endpoint for fetching bond results
 export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth()
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if we're in mock data mode
+    const useMockData = process.env.USE_MOCK_FINRA_DATA === 'true'
+
+    if (useMockData) {
+      // Generate mock bond results for demo
+      const mockBonds = [
+        {
+          rank: 1,
+          bondId: 'mock-1',
+          bond: {
+            cusip: '912828YW1',
+            issuerName: 'US Treasury',
+            type: 'TREASURY',
+            coupon: 4.5,
+            maturity: new Date('2028-05-15'),
+            callable: false,
+            rating: 'AAA',
+            price: 98.5,
+            yield: 4.75,
+            yieldToWorst: 4.75
+          },
+          atytw: 3.56, // After-tax YTW
+          preTaxYtw: 4.75,
+          effectiveTaxRate: 0.25,
+          stabilityScore: 98,
+          liquidityScore: 100,
+          explanation: {
+            taxBenefit: 'Taxable',
+            stabilityFactors: ['Rating: AAA', 'Stability Score: 98.00'],
+            liquidityFactors: ['Liquidity Score: 100.00']
+          }
+        },
+        {
+          rank: 2,
+          bondId: 'mock-2',
+          bond: {
+            cusip: '73358WAA9',
+            issuerName: 'Virginia State',
+            type: 'MUNICIPAL',
+            coupon: 3.75,
+            maturity: new Date('2030-07-01'),
+            callable: true,
+            rating: 'AA+',
+            price: 96.25,
+            yield: 4.25,
+            yieldToWorst: 4.1
+          },
+          atytw: 4.1, // Tax-exempt, so same as YTW
+          preTaxYtw: 4.1,
+          effectiveTaxRate: 0,
+          stabilityScore: 92,
+          liquidityScore: 85,
+          explanation: {
+            taxBenefit: 'Tax-exempt',
+            stabilityFactors: ['Rating: AA+', 'Stability Score: 92.00'],
+            liquidityFactors: ['Liquidity Score: 85.00']
+          }
+        },
+        {
+          rank: 3,
+          bondId: 'mock-3',
+          bond: {
+            cusip: '458140BB4',
+            issuerName: 'Apple Inc',
+            type: 'CORPORATE',
+            coupon: 4.85,
+            maturity: new Date('2029-02-09'),
+            callable: false,
+            rating: 'AA+',
+            price: 99.75,
+            yield: 4.9,
+            yieldToWorst: 4.9
+          },
+          atytw: 3.68,
+          preTaxYtw: 4.9,
+          effectiveTaxRate: 0.25,
+          stabilityScore: 94,
+          liquidityScore: 95,
+          explanation: {
+            taxBenefit: 'Taxable',
+            stabilityFactors: ['Rating: AA+', 'Stability Score: 94.00'],
+            liquidityFactors: ['Liquidity Score: 95.00']
+          }
+        }
+      ]
+
+      return NextResponse.json({
+        runId: 'mock-run-' + Date.now(),
+        ranAt: new Date().toISOString(),
+        results: mockBonds
+      })
     }
 
     const user = await prisma.user.findUnique({
@@ -79,7 +173,7 @@ export async function GET(request: NextRequest) {
           const marketData = bond.marketData[0]
           if (!marketData) return null
 
-          const atytw = calculateATYTW(
+          const atytw = computeATYTW(
             bond.type,
             marketData.yieldToWorst,
             federalRate,

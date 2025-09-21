@@ -94,7 +94,7 @@
   /* Claude's exact dark mode colors */
   --background: #262624; /* Claude's exact dark mode background */
   --foreground: #E5E5E3; /* Claude's text color */
-  --card: #30302E; /* Claude's text box color for cards */
+  --card: #3A3A37; /* Slightly lighter than text box for better separation */
   --card-foreground: #E5E5E3; /* Claude's text color */
   --popover: #30302E; /* Claude's text box color */
   --popover-foreground: #E5E5E3; /* Claude's text color */
@@ -103,11 +103,11 @@
   --secondary: #3A3A37; /* Slightly lighter than text box */
   --secondary-foreground: #E5E5E3; /* Claude's text color */
   --muted: #3A3A37; /* Slightly lighter than text box */
-  --muted-foreground: #B0B0AE; /* Muted text based on Claude's style */
+  --muted-foreground: #B1ADA1; /* Claude's cloudy color for better readability */
   --accent: oklch(0.55 0.15 32); /* #C15F3C - Claude's crail color */
   --accent-foreground: #E5E5E3; /* Claude's text color */
   --destructive: oklch(0.704 0.191 22.216);
-  --border: #404040; /* Subtle border based on Claude's interface */
+  --border: #4A4A47; /* Slightly more visible border for better card separation */
   --input: #3A3A37; /* Slightly lighter to differentiate from background */
   --ring: oklch(0.66 0.17 37); /* Orange ring */
   --chart-1: oklch(0.66 0.17 37); /* Orange */
