@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,8 +14,7 @@ import {
   Star,
   Calculator,
   ExternalLink,
-  Filter,
-  ChevronRight
+  Filter
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { theme } from '@/lib/themes'
@@ -51,6 +50,7 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchLatestResults()
   }, [])
+
 
   const fetchLatestResults = async () => {
     try {
@@ -136,8 +136,9 @@ export default function DashboardPage() {
     toast.success('Added to watchlist')
   }
 
+
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-transparent dark:to-transparent dark:bg-background">
       <main className={`${theme.layout.container.margin} ${theme.layout.container.padding} ${theme.layout.page.padding}`}>
         <div className="grid gap-6 mb-8 md:grid-cols-4">
           <Card>

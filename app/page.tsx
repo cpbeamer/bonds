@@ -1,9 +1,45 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, TrendingUp, Shield, Clock, Calculator } from 'lucide-react'
 import { theme, brand } from '@/lib/themes'
 
 export default function LandingPage() {
+  const { isSignedIn, isLoaded } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/dashboard')
+    }
+  }, [isLoaded, isSignedIn, router])
+
+  // Show loading or nothing while checking auth status
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-semibold text-gray-900 dark:text-neutral-50">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // If user is signed in, they'll be redirected, but show loading state briefly
+  if (isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-semibold text-gray-900 dark:text-neutral-50">Redirecting to dashboard...</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-neutral-900 dark:to-neutral-800">
       <main className={`${theme.layout.container.margin} ${theme.layout.container.padding} py-20`}>
