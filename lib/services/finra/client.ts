@@ -5,21 +5,28 @@ import { MockDataGenerator } from './mock-data';
 export class FINRAClient {
   private client: AxiosInstance | null = null;
   private baseURL: string;
+  private clientId: string;
   private useMockData: boolean;
 
   constructor() {
     this.baseURL = process.env.FINRA_API_URL || 'https://api.finra.org/data/group/otcMarket/name';
+    this.clientId = process.env.FINRA_CLIENT_ID || '';
     this.useMockData = process.env.USE_MOCK_FINRA_DATA === 'true' || process.env.NODE_ENV === 'development';
 
     if (this.useMockData) {
       console.log('🔧 FINRA Client: Using mock data for development');
     } else {
+      if (!this.clientId) {
+        console.warn('⚠️  FINRA Client ID not found. Set FINRA_CLIENT_ID in environment variables.');
+      }
+
       this.client = axios.create({
         baseURL: this.baseURL,
         timeout: 30000,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'X-Client-Id': this.clientId,
         }
       });
 
