@@ -11,6 +11,7 @@ interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  bondContext?: any[]
 }
 
 interface ChatSession {
@@ -26,6 +27,7 @@ export default function AIResearchPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [currentMessage, setCurrentMessage] = useState('')
   const [isAITyping, setIsAITyping] = useState(false)
+  const [selectedBonds, setSelectedBonds] = useState<any[]>([])
   const chatMessagesRef = useRef<HTMLDivElement>(null)
 
   const currentSession = chatSessions.find(session => session.id === currentSessionId)
@@ -69,7 +71,8 @@ export default function AIResearchPage() {
       id: Date.now().toString(),
       role: 'user',
       content: currentMessage.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      bondContext: selectedBonds.length > 0 ? selectedBonds : undefined
     }
 
     setCurrentMessage('')
@@ -85,11 +88,32 @@ export default function AIResearchPage() {
     ))
     setIsAITyping(true)
 
-    setTimeout(() => {
+    try {
+      const currentSession = chatSessions.find(s => s.id === sessionId)
+      const messages = currentSession ? currentSession.messages.map(m => ({
+        role: m.role,
+        content: m.content
+      })) : []
+
+      messages.push({ role: 'user', content: userMessage.content })
+
+      const response = await fetch('/api/ai-research/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: messages.slice(-10),
+          bondContext: selectedBonds
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to get AI response')
+
+      const data = await response.json()
+
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: generateAIResponse(userMessage.content),
+        content: data.message,
         timestamp: new Date()
       }
 
@@ -102,8 +126,53 @@ export default function AIResearchPage() {
             }
           : session
       ))
+    } catch (error) {
+      console.error('Error sending message:', error)
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error. Please try again.',
+        timestamp: new Date()
+      }
+
+      setChatSessions(prev => prev.map(session =>
+        session.id === sessionId
+          ? {
+              ...session,
+              messages: [...session.messages, errorResponse],
+              lastActivity: new Date()
+            }
+          : session
+      ))
+    } finally {
       setIsAITyping(false)
-    }, 1500)
+      setSelectedBonds([])
+    }
+  }
+
+  const analyzeBonds = async (bondIds: string[]) => {
+    setIsAITyping(true)
+    try {
+      const response = await fetch('/api/ai-research/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bondIds,
+          query: 'Provide detailed analysis of these bonds for investment consideration'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to analyze bonds')
+
+      const data = await response.json()
+      setSelectedBonds(data.bonds)
+      setCurrentMessage('Please analyze these bonds for me')
+      setTimeout(() => sendMessage(), 100)
+    } catch (error) {
+      console.error('Error analyzing bonds:', error)
+    } finally {
+      setIsAITyping(false)
+    }
   }
 
   const generateAIResponse = (message: string): string => {
@@ -430,6 +499,25 @@ What specific area would you like to explore? Feel free to ask about particular 
                 </div>
               )}
             </div>
+
+            {/* Bond Context Indicator */}
+            {selectedBonds.length > 0 && (
+              <div className="px-6 pb-2">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg px-3 py-2 flex items-center justify-between">
+                    <span className="text-sm text-orange-800 dark:text-orange-200">
+                      {selectedBonds.length} bond{selectedBonds.length > 1 ? 's' : ''} selected for analysis
+                    </span>
+                    <button
+                      onClick={() => setSelectedBonds([])}
+                      className="text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Input Area */}
             <div className="px-6 pb-6">
