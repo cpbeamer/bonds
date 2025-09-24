@@ -6,16 +6,36 @@ import { Prisma } from '@prisma/client';
 
 export class FINRADataSync {
   private client: FINRAClient;
+  private syncStats = {
+    bondsProcessed: 0,
+    bondsCreated: 0,
+    bondsUpdated: 0,
+    errors: 0,
+    startTime: new Date()
+  };
 
   constructor() {
     this.client = new FINRAClient();
   }
 
+  private log(message: string, level: 'info' | 'error' | 'warn' = 'info') {
+    const timestamp = new Date().toISOString();
+    const prefix = {
+      info: '📊',
+      error: '❌',
+      warn: '⚠️'
+    }[level];
+
+    console.log(`[${timestamp}] ${prefix} ${message}`);
+  }
+
   async syncBond(cusip: string): Promise<string | null> {
     try {
+      this.log(`Syncing bond: ${cusip}`);
       const bondData = await this.client.getBondDetails(cusip);
+
       if (!bondData) {
-        console.log(`No bond data found for CUSIP: ${cusip}`);
+        this.log(`No bond data found for CUSIP: ${cusip}`, 'warn');
         return null;
       }
 
@@ -25,14 +45,21 @@ export class FINRADataSync {
 
       if (existingBond) {
         await this.updateBond(existingBond.id, bondData);
+        this.syncStats.bondsUpdated++;
+        this.log(`Updated bond: ${cusip} - ${bondData.issuerName}`);
         return existingBond.id;
       } else {
         const newBond = await this.createBond(bondData);
+        this.syncStats.bondsCreated++;
+        this.log(`Created new bond: ${cusip} - ${bondData.issuerName}`);
         return newBond.id;
       }
     } catch (error) {
-      console.error(`Error syncing bond ${cusip}:`, error);
+      this.syncStats.errors++;
+      this.log(`Error syncing bond ${cusip}: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
       return null;
+    } finally {
+      this.syncStats.bondsProcessed++;
     }
   }
 
@@ -81,17 +108,23 @@ export class FINRADataSync {
 
   async syncMarketData(cusips: string[]): Promise<void> {
     try {
-      console.log(`Syncing market data for ${cusips.length} bonds...`);
+      this.log(`Syncing market data for ${cusips.length} bonds...`);
 
-      const marketDataList = await this.client.getMarketData(cusips);
+      const batchSize = 50;
+      for (let i = 0; i < cusips.length; i += batchSize) {
+        const batch = cusips.slice(i, i + batchSize);
+        const marketDataList = await this.client.getMarketData(batch);
 
-      for (const marketData of marketDataList) {
-        await this.upsertMarketData(marketData);
+        for (const marketData of marketDataList) {
+          await this.upsertMarketData(marketData);
+        }
+
+        this.log(`Processed batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(cusips.length / batchSize)} (${marketDataList.length} bonds with data)`);
       }
 
-      console.log(`Successfully synced market data for ${marketDataList.length} bonds`);
+      this.log(`Successfully synced market data for all bonds`);
     } catch (error) {
-      console.error('Error syncing market data:', error);
+      this.log(`Error syncing market data: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     }
   }
 
@@ -206,7 +239,18 @@ export class FINRADataSync {
 
   async performDailySync(): Promise<void> {
     try {
-      console.log('Starting daily FINRA data sync...');
+      this.syncStats = {
+        bondsProcessed: 0,
+        bondsCreated: 0,
+        bondsUpdated: 0,
+        errors: 0,
+        startTime: new Date()
+      };
+
+      this.log('=================================================');
+      this.log('Starting daily FINRA data sync...');
+      this.log(`Time: ${new Date().toLocaleString()}`);
+      this.log('=================================================');
 
       const activeUsers = await prisma.user.findMany({
         where: {
@@ -220,7 +264,7 @@ export class FINRADataSync {
         select: { id: true }
       });
 
-      console.log(`Syncing data for ${activeUsers.length} active users`);
+      this.log(`Found ${activeUsers.length} active users to sync`);
 
       for (const user of activeUsers) {
         await this.syncUserRelevantBonds(user.id);
@@ -234,9 +278,19 @@ export class FINRADataSync {
       const cusips = existingBonds.map(b => b.cusip);
       await this.syncMarketData(cusips);
 
-      console.log('Daily FINRA data sync completed');
+      const duration = (new Date().getTime() - this.syncStats.startTime.getTime()) / 1000;
+
+      this.log('=================================================');
+      this.log('Daily sync completed successfully');
+      this.log(`Duration: ${Math.round(duration)} seconds`);
+      this.log(`Bonds processed: ${this.syncStats.bondsProcessed}`);
+      this.log(`Bonds created: ${this.syncStats.bondsCreated}`);
+      this.log(`Bonds updated: ${this.syncStats.bondsUpdated}`);
+      this.log(`Errors: ${this.syncStats.errors}`);
+      this.log('=================================================');
     } catch (error) {
-      console.error('Error during daily sync:', error);
+      this.log(`Critical error in daily sync: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+      throw error;
     }
   }
 

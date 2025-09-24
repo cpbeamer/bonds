@@ -14,7 +14,12 @@
     "finra:seed": "tsx scripts/seed-finra.ts",
     "finra:scheduler": "tsx scripts/start-scheduler.ts",
     "finra:sync": "tsx scripts/start-scheduler.ts --immediate",
-    "finra:test": "tsx scripts/test-mock-data.ts"
+    "finra:test": "tsx scripts/test-mock-data.ts",
+    "finra:test-connection": "tsx scripts/test-finra-connection.ts",
+    "finra:start": "pm2 start ecosystem.config.js",
+    "finra:stop": "pm2 stop finra-scheduler",
+    "finra:restart": "pm2 restart finra-scheduler",
+    "finra:logs": "pm2 logs finra-scheduler"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",

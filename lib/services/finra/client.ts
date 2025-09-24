@@ -5,38 +5,107 @@ import { MockDataGenerator } from './mock-data';
 export class FINRAClient {
   private client: AxiosInstance | null = null;
   private baseURL: string;
+  private authURL: string;
   private clientId: string;
+  private clientSecret: string;
   private useMockData: boolean;
+  private accessToken: string | null = null;
+  private tokenExpiry: Date | null = null;
 
   constructor() {
-    this.baseURL = process.env.FINRA_API_URL || 'https://api.finra.org/data/group/otcMarket/name';
-    this.clientId = process.env.FINRA_CLIENT_ID || '';
+    this.baseURL = process.env.FINRA_API_URL || 'https://api.finra.org';
+    this.authURL = process.env.FINRA_AUTH_URL || 'https://ews.fip.finra.org/fip/rest/ews/oauth2/access_token';
+    this.clientId = process.env.FINRA_API_CLIENT_ID || '';
+    this.clientSecret = process.env.FINRA_API_CLIENT_SECRET || '';
     this.useMockData = process.env.USE_MOCK_FINRA_DATA === 'true' || process.env.NODE_ENV === 'development';
 
     if (this.useMockData) {
       console.log('🔧 FINRA Client: Using mock data for development');
     } else {
-      if (!this.clientId) {
-        console.warn('⚠️  FINRA Client ID not found. Set FINRA_CLIENT_ID in environment variables.');
+      if (!this.clientId || !this.clientSecret) {
+        console.warn('⚠️  FINRA credentials not found. Set FINRA_API_CLIENT_ID and FINRA_API_CLIENT_SECRET in environment variables.');
       }
 
-      this.client = axios.create({
-        baseURL: this.baseURL,
-        timeout: 30000,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'X-Client-Id': this.clientId,
-        }
-      });
+      this.initializeClient();
+    }
+  }
 
-      this.client.interceptors.response.use(
-        response => response,
-        error => {
-          console.error('FINRA API Error:', error.response?.data || error.message);
-          throw error;
+  private async initializeClient() {
+    this.client = axios.create({
+      baseURL: this.baseURL,
+      timeout: 30000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    });
+
+    this.client.interceptors.request.use(
+      async (config) => {
+        const token = await this.getAccessToken();
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
+    this.client.interceptors.response.use(
+      response => response,
+      async error => {
+        if (error.response?.status === 401) {
+          console.log('🔄 Token expired, refreshing...');
+          this.accessToken = null;
+          this.tokenExpiry = null;
+
+          const originalRequest = error.config;
+          const token = await this.getAccessToken();
+          if (token) {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return this.client!.request(originalRequest);
+          }
+        }
+
+        console.error('FINRA API Error:', error.response?.data || error.message);
+        throw error;
+      }
+    );
+  }
+
+  private async getAccessToken(): Promise<string | null> {
+    try {
+      if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
+        return this.accessToken;
+      }
+
+      console.log('🔐 Obtaining new FINRA access token...');
+
+      const credentials = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+
+      const response = await axios.post(
+        `${this.authURL}?grant_type=client_credentials`,
+        {},
+        {
+          headers: {
+            'Authorization': `Basic ${credentials}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         }
       );
+
+      if (response.data && response.data.access_token) {
+        this.accessToken = response.data.access_token;
+        const expiresIn = response.data.expires_in || 43170;
+        this.tokenExpiry = new Date(Date.now() + (expiresIn - 60) * 1000);
+        console.log(`✅ Access token obtained, expires at ${this.tokenExpiry.toLocaleString()}`);
+        return this.accessToken;
+      }
+
+      throw new Error('Failed to obtain access token');
+    } catch (error) {
+      console.error('❌ Failed to get access token:', error);
+      return null;
     }
   }
 
@@ -45,6 +114,10 @@ export class FINRAClient {
       if (this.useMockData) {
         const days = startDate ? Math.ceil((new Date().getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)) : 30;
         return MockDataGenerator.getMockTradesByCusip(cusip, days);
+      }
+
+      if (!this.client) {
+        await this.initializeClient();
       }
 
       const params: any = {
@@ -59,7 +132,7 @@ export class FINRAClient {
         params.endDate = this.formatDate(endDate);
       }
 
-      const response = await this.client!.get('/corporateBondTrades', { params });
+      const response = await this.client!.get('/data/group/otcMarket/name/corporateBondTrades', { params });
 
       return this.parseTradeData(response.data);
     } catch (error) {
@@ -74,7 +147,11 @@ export class FINRAClient {
         return MockDataGenerator.getMockBondByCusip(cusip);
       }
 
-      const response = await this.client!.get(`/bondDetails/${cusip}`);
+      if (!this.client) {
+        await this.initializeClient();
+      }
+
+      const response = await this.client!.get(`/data/group/otcMarket/name/bondDetails/${cusip}`);
       return this.parseBondData(response.data);
     } catch (error) {
       console.error(`Error fetching bond details for CUSIP ${cusip}:`, error);
@@ -171,7 +248,11 @@ export class FINRAClient {
       }
       if (criteria.state) params.state = criteria.state;
 
-      const response = await this.client!.get('/bondSearch', { params });
+      if (!this.client) {
+        await this.initializeClient();
+      }
+
+      const response = await this.client!.get('/data/group/otcMarket/name/bondSearch', { params });
 
       return response.data.map((bond: any) => this.parseBondData(bond)).filter(Boolean);
     } catch (error) {
