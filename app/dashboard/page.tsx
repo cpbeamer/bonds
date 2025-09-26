@@ -7,14 +7,21 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Star,
   Calculator,
   ExternalLink,
-  TrendingUp
+  TrendingUp,
+  GitCompareArrows,
+  Leaf,
+  Heart,
+  Globe
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { theme } from '@/lib/themes'
+import { BondComparison } from '@/components/bond-comparison'
+import { ESGFilter } from '@/components/esg-filter'
 
 interface BondResult {
   id: string
@@ -29,6 +36,10 @@ interface BondResult {
     maturity: string
     callable: boolean
     price?: number
+    isGreenBond?: boolean
+    isSocialBond?: boolean
+    isSustainableBond?: boolean
+    esgScore?: number
   }
   rank: number
   atytw: number
@@ -65,6 +76,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [selectedYieldView, setSelectedYieldView] = useState<'highest' | 'median'>('highest')
   const [selectedLadder, setSelectedLadder] = useState<'1year' | '2year' | '5year'>('1year')
+  const [showComparison, setShowComparison] = useState(false)
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([])
+  const [esgFilters, setESGFilters] = useState<any>(null)
 
   const ladderConfigs = {
     '1year': {
@@ -308,6 +322,8 @@ export default function DashboardPage() {
         maturity: '2034-08-01',
         callable: false,
         price: 98.5,
+        isGreenBond: true,
+        esgScore: 85,
       },
       rank: 1,
       atytw: 3.12,
@@ -329,6 +345,9 @@ export default function DashboardPage() {
         maturity: '2033-12-01',
         callable: true,
         price: 101.2,
+        isSocialBond: true,
+        isSustainableBond: true,
+        esgScore: 92,
       },
       rank: 2,
       atytw: 3.08,
@@ -364,6 +383,29 @@ export default function DashboardPage() {
     toast.success('Added to watchlist')
   }
 
+  const toggleComparisonSelection = (bondId: string) => {
+    if (selectedForComparison.includes(bondId)) {
+      setSelectedForComparison(selectedForComparison.filter(id => id !== bondId))
+    } else {
+      if (selectedForComparison.length >= 4) {
+        toast.error('Maximum 4 bonds can be compared')
+        return
+      }
+      setSelectedForComparison([...selectedForComparison, bondId])
+    }
+  }
+
+  const getSelectedBondsForComparison = () => {
+    return results
+      .filter(r => selectedForComparison.includes(r.id))
+      .map(r => ({
+        id: r.id,
+        ...r.bond,
+        yield: r.preTaxYtw * 100,
+        atytw: r.atytw * 100,
+      }))
+  }
+
 
   const LadderChart = ({ data, maxRate = 4.5 }: { data: LadderData[], maxRate?: number }) => {
     return (
@@ -390,10 +432,39 @@ export default function DashboardPage() {
       <main className={`${theme.layout.container.margin} ${theme.layout.container.padding} ${theme.layout.page.padding}`}>
 <Card>
           <CardHeader>
-            <CardTitle>Top Ranked Bonds</CardTitle>
-            <CardDescription>
-              Based on your tax profile and preferences
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Top Ranked Bonds</CardTitle>
+                <CardDescription>
+                  Based on your tax profile and preferences
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <ESGFilter 
+                  onFilterChange={(filters) => setESGFilters(filters)}
+                  bondCount={results.length}
+                />
+                {selectedForComparison.length > 0 && (
+                  <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowComparison(true)}
+                  >
+                    <GitCompareArrows className="w-4 h-4 mr-2" />
+                    Compare ({selectedForComparison.length})
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedForComparison([])}
+                  >
+                    Clear
+                  </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
                 {loading ? (
@@ -402,6 +473,18 @@ export default function DashboardPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedForComparison.length === results.length && results.length > 0}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedForComparison(results.slice(0, 4).map(r => r.id))
+                              } else {
+                                setSelectedForComparison([])
+                              }
+                            }}
+                          />
+                        </TableHead>
                         <TableHead>Rank</TableHead>
                         <TableHead>Issuer</TableHead>
                         <TableHead>Details</TableHead>
@@ -415,6 +498,12 @@ export default function DashboardPage() {
                     <TableBody>
                       {results.map((result, index) => (
                         <TableRow key={`${result.id}-${index}`}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedForComparison.includes(result.id)}
+                              onCheckedChange={() => toggleComparisonSelection(result.id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Badge variant="default">{result.rank}</Badge>
                           </TableCell>
@@ -432,6 +521,28 @@ export default function DashboardPage() {
                               <div className="text-muted-foreground">
                                 {result.bond.ratingBucket} {result.bond.callable && '• Callable'}
                               </div>
+                              {(result.bond.isGreenBond || result.bond.isSocialBond || result.bond.isSustainableBond) && (
+                                <div className="flex gap-1 mt-1">
+                                  {result.bond.isGreenBond && (
+                                    <Badge variant="outline" className="text-xs gap-1 border-green-500 text-green-600 dark:text-green-400">
+                                      <Leaf className="w-3 h-3" />
+                                      Green
+                                    </Badge>
+                                  )}
+                                  {result.bond.isSocialBond && (
+                                    <Badge variant="outline" className="text-xs gap-1 border-red-500 text-red-600 dark:text-red-400">
+                                      <Heart className="w-3 h-3" />
+                                      Social
+                                    </Badge>
+                                  )}
+                                  {result.bond.isSustainableBond && (
+                                    <Badge variant="outline" className="text-xs gap-1 border-blue-500 text-blue-600 dark:text-blue-400">
+                                      <Globe className="w-3 h-3" />
+                                      Sustainable
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-semibold">
@@ -702,6 +813,21 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Bond Comparison Modal */}
+      {showComparison && selectedForComparison.length > 0 && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background max-w-7xl w-full max-h-[90vh] overflow-y-auto rounded-lg">
+            <BondComparison
+              bonds={getSelectedBondsForComparison()}
+              onClose={() => {
+                setShowComparison(false)
+                setSelectedForComparison([])
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

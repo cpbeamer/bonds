@@ -16,7 +16,9 @@ export function Header() {
   const pathname = usePathname()
   const isDashboard = pathname === '/dashboard'
   const isAIResearch = pathname === '/ai-research'
-  const isSignedInPage = isDashboard || isAIResearch
+  const isAlerts = pathname === '/alerts'
+  const isPortfolio = pathname === '/portfolio'
+  const isSignedInPage = isDashboard || isAIResearch || isAlerts || isPortfolio
 
   return (
     <header className={`${theme.layout.header.background} ${theme.layout.header.padding} flex justify-between items-center gap-4`} style={{ height: theme.layout.header.height }}>
@@ -47,6 +49,26 @@ export function Header() {
               }`}
             >
               AI Research
+            </Link>
+            <Link
+              href="/portfolio"
+              className={`px-4 py-2 rounded-md transition-colors ${
+                isPortfolio
+                  ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 font-medium'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+              }`}
+            >
+              Portfolio
+            </Link>
+            <Link
+              href="/alerts"
+              className={`px-4 py-2 rounded-md transition-colors ${
+                isAlerts
+                  ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 font-medium'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+              }`}
+            >
+              Alerts
             </Link>
           </div>
         </SignedIn>

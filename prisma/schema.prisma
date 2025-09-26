@@ -24,6 +24,7 @@ model User {
   runs              Run[]
   watchlist         Watchlist[]
   alerts            Alert[]
+  notifications     Notification[]
   settings          UserSettings?
 
   createdAt         DateTime          @default(now())
@@ -116,9 +117,20 @@ model Bond {
   insurer           String?
   underlyingRating  String?
 
+  // ESG Fields
+  isGreenBond       Boolean           @default(false)
+  isSocialBond      Boolean           @default(false)
+  isSustainableBond Boolean           @default(false)
+  esgScore          Float?
+  esgRating         String?
+  useOfProceeds     String?
+  unSDGs            String[]          @default([])
+  climateAligned    Boolean           @default(false)
+
   marketData        MarketData[]
   results           Result[]
   watchlist         Watchlist[]
+  alerts            Alert[]
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -126,6 +138,9 @@ model Bond {
   @@index([type, state])
   @@index([maturity])
   @@index([ratingBucket])
+  @@index([isGreenBond])
+  @@index([isSocialBond])
+  @@index([isSustainableBond])
 }
 
 model Issuer {
@@ -232,15 +247,44 @@ model Alert {
   id                String            @id @default(cuid())
   userId            String
   user              User              @relation(fields: [userId], references: [id])
+  bondId            String?
+  bond              Bond?             @relation(fields: [bondId], references: [id])
 
   type              AlertType
-  bondCusip         String?
-  condition         Json
-  triggered         Boolean           @default(false)
-  triggeredAt       DateTime?
+  condition         AlertCondition
+  threshold         Float
+  isActive          Boolean           @default(true)
+  lastTriggered     DateTime?
+  frequency         AlertFrequency    @default(ONCE_PER_DAY)
+
+  notifications     Notification[]
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+
+  @@index([userId, isActive])
+  @@index([bondId])
+}
+
+model Notification {
+  id                String            @id @default(cuid())
+  alertId           String
+  alert             Alert             @relation(fields: [alertId], references: [id])
+  userId            String
+  user              User              @relation(fields: [userId], references: [id])
+
+  type              NotificationType
+  title             String
+  message           String            @db.Text
+  data              Json?
+  isRead            Boolean           @default(false)
+  emailSent         Boolean           @default(false)
+
+  createdAt         DateTime          @default(now())
+
+  @@index([userId, isRead])
+  @@index([alertId])
+  @@index([createdAt])
 }
 
 enum BondType {
@@ -293,9 +337,33 @@ enum RunStatus {
 }
 
 enum AlertType {
-  PRICE_TARGET
-  YIELD_TARGET
-  CALL_APPROACHING
-  MATURITY_APPROACHING
+  PRICE_ABOVE
+  PRICE_BELOW
+  YIELD_ABOVE
+  YIELD_BELOW
   RATING_CHANGE
+  MATURITY_APPROACHING
+  CALL_APPROACHING
+  NEW_ISSUE
+  TRADE_VOLUME
+}
+
+enum AlertCondition {
+  GREATER_THAN
+  LESS_THAN
+  EQUALS
+  CHANGE_PERCENT
+}
+
+enum AlertFrequency {
+  ONCE_PER_DAY
+  ONCE_PER_HOUR
+  REAL_TIME
+  ONCE_ONLY
+}
+
+enum NotificationType {
+  EMAIL
+  IN_APP
+  PUSH
 }
